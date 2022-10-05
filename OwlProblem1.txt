@@ -1,0 +1,40 @@
+(define (problem Problem1)
+    (:domain OwlWorld)
+    (:objects
+        pen ring - SmallObject
+        bag - BigObject
+        shelf1 shelf2 - shelf
+        Sova - owl
+        agility - smallbuff
+        strength - bigbuff
+        room1 room2 corridor - room
+        l1 l2 l3 l4 l5 l6 l7 l8 l9 l10 l11 - location
+    )
+    (:init
+        (in l1 room1)
+        (in l2 room1)
+        (in l3 room1)
+        (in l4 room1)
+        (in l5 room1)
+        (in l6 room1)
+        (in l7 room1)
+        (in l7 corridor)
+        (in l8 room2)
+        (in l9 room2)
+        (in l10 room2)
+        (in l11 room2)
+        (in l11 corridor)
+        (at Sova l1)
+        (at shelf1 l2)
+        (at shelf2 l8)
+        (at pen l2)
+        (at ring l3)
+        (at bag l9)
+        (at agility l3)
+        (at strength l10)
+    )
+    
+    (:goal
+        (and (at pen l9)(NotPushedoff ring)(at ring l8)(fallen bag))
+    )
+)

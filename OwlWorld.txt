@@ -1,0 +1,91 @@
+(define (domain OwlWorld)
+    (:requirements :strips :adl)
+    (:types
+        object place owl size smallbuff bigbuff - type
+        SmallObject BigObject owl shelf - object
+        room location - place
+        small big - size
+        Agility - smallbuff
+        Strength - bigbuff
+    )
+    
+    (:predicates
+        (at ?x - object ?loc - location)
+        (in ?loc - location ?r - room)
+        (on ?sh - shelf)
+        (NotPushedOff ?p - object)
+        (fallen ?f - object)
+        (OnAShelf)
+        (small ?so - SmallObject)
+        (big ?bo - BigObject)
+        (Holds ?x - object ?ob - object)
+        (GrabOn ?x - object ?ob - object)
+        (agile)
+        (strong)
+    )
+
+    (:action Go ;ходьба 
+        :parameters(?x - location ?y - location ?r - room)
+        :precondition(and (at Sova ?x) (not (= ?x ?y)) (in ?x ?r) (in ?y ?r) (not(OnAShelf)))
+        :effect(and (not(at Sova ?x)) (at Sova ?y))
+    )
+    (:action getAgility ;взять бафф на ловкость
+        :parameters(?x - location ?y - smallBuff)
+        :precondition(and (at Sova ?x)(at ?y ?x))
+        :effect(and (not(at ?y ?x))(agile))
+    )
+    
+    (:action getStrength ;взять бафф на силу
+        :parameters(?x - location ?y - bigBuff)
+        :precondition(and (at Sova ?x)(at ?y ?x))
+        :effect(and (not(at ?y ?x))(Strong))
+    )
+
+    (:action Push ;двигать предметы 
+        :parameters(?so - SmallObject ?x - location ?y - location ?r - room)
+        :precondition(and (not(OnAShelf))(at Sova ?x) (at ?so ?x)(agile)(not (= ?x ?y)) (in ?x ?r) (in ?y ?r)(not(NotPushedOff ?so)))
+        :effect(and (not(at Sova ?x)) (at Sova ?y) (not(at ?so ?x)) (at ?so ?y)(not(NotPushedOff ?so)))
+    )
+    
+    (:action Drag ;двигать предметы 
+        :parameters(?bo - BigObject ?x - location ?y - location ?r - room)
+        :precondition(and (at Sova ?x) (at ?bo ?x)(Strong) (not (= ?x ?y)) (in ?x ?r) (in ?y ?r)(GrabOn Sova ?bo)(not(OnAShelf)))
+        :effect(and (not(at Sova ?x)) (at Sova ?y) (not(at ?bo ?x)) (at ?bo ?y)(not(GrabOn Sova ?bo)))
+    )
+
+    (:action FlyUp ;подняться на полку 
+        :parameters(?sh - shelf ?x - location)
+        :precondition(and (at Sova ?x) (at ?sh ?x))
+        :effect(and(on ?sh) (OnAShelf))
+    )
+
+    (:action FlyDown ;спуститься 
+        :parameters(?sh - shelf ?x - location)
+        :precondition(and (OnAShelf) (at Sova ?x) (at ?sh ?x) (on ?sh))
+        :effect(and (not(on ?sh)) (not(OnAShelf)))
+    )   
+
+    (:action Carry ;носит предметы
+        :parameters(?so - SmallObject ?x - location)
+        :precondition(and (not(OnAShelf))(at Sova ?x)(not(NotPushedOff ?so))(agile)(at ?so ?x))
+        :effect(and (not(at ?so ?x)) (Holds Sova ?so))
+    )
+
+    (:action Put ;кладет предметы на полку
+        :parameters(?so - SmallObject ?x - location ?sh - shelf)
+        :precondition(and (OnAShelf)(Holds Sova ?so)(agile)(at Sova ?x))
+        :effect(and (at ?so ?x)(not(Holds Sova ?so))(NotPushedOff ?so))
+    )
+    
+    (:action Grab ;и хватает
+        :parameters(?bo - BigObject ?x - location)
+        :precondition(and (at Sova ?x)(Strong)(at ?bo ?x))
+        :effect(and (GrabOn Sova ?bo))
+    )
+
+    (:action PushOff ;и скидывает
+        :parameters(?bo - BigObject ?x - location)
+        :precondition(and (at Sova ?x)(at ?bo ?x)(strong)(GrabOn Sova ?bo))
+        :effect(and (fallen ?bo) (not(GrabOn Sova ?bo)))
+    )
+)
